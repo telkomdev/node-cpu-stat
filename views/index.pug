@@ -1,0 +1,75 @@
+extends layout
+
+block content
+    script.
+        $(document).ready(function(){
+            var ctx = document.getElementById('chart');
+
+            var color = Chart.helpers.color;
+            var chartConfig = {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'The percentage of CPU utilization (User level)',
+                        backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+                        borderColor: window.chartColors.red,
+                        fill: false,
+                        data: [],
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'The percentage of CPU utilization (System level)',
+                        backgroundColor: color(window.chartColors.blue).alpha(0.5).rgbString(),
+                        borderColor: window.chartColors.blue,
+                        fill: false,
+                        data: [],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    animation: {
+                        duration: 0
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            };
+
+            var myChart = new Chart(ctx, chartConfig);
+
+            socket.onmessage = function(event){
+                var data = JSON.parse(event.data);
+                console.log(data);
+
+                myChart.config.data.labels.push(data.date);
+                myChart.config.data.datasets[0].data.push(data.cpu.user);
+                myChart.config.data.datasets[1].data.push(data.cpu.system);
+                
+                myChart.update();
+
+                if (myChart.config.data.labels.length > 5) {
+                    myChart.config.data.labels.shift();
+                    myChart.config.data.datasets[0].data.shift();
+                    myChart.config.data.datasets[1].data.shift();
+
+                    myChart.update();
+                }
+                
+            }
+        });
+    div.panel.panel-primary
+        div.panel.panel-heading
+            h4
+                span.label.label-danger CPU Stat
+        div.panel.panel-body
+            canvas(id="chart" width="400" height="400")
