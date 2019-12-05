@@ -1,10 +1,27 @@
 const Websocket = require('ws');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const express = require('express');
 
 // load env
 require('dotenv').config();
 
+const HttpHandler = require('./lib/http_handler');
+const httpHandler = new HttpHandler();
+
 const app = express();
+
+//view engine
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+
+//middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
 const server = require('http').createServer(app);
 
 const listener = new Websocket.Server({
@@ -14,6 +31,8 @@ const listener = new Websocket.Server({
 // init chat
 require('./lib/socket')(listener);
 
+// routes
+app.get('/', httpHandler.index);
 
 // set PORT
 const PORT = process.env.PORT;
