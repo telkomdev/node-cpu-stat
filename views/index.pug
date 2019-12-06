@@ -3,10 +3,11 @@ extends layout
 block content
     script.
         $(document).ready(function(){
-            var ctx = document.getElementById('chart');
+            var cpuCtx = document.getElementById('chartCpu');
+            var diskCtx = document.getElementById('chartDisk');
 
             var color = Chart.helpers.color;
-            var chartConfig = {
+            var chartCpuConfig = {
                 type: 'line',
                 data: {
                     labels: [],
@@ -45,31 +46,81 @@ block content
                 }
             };
 
-            var myChart = new Chart(ctx, chartConfig);
+             var chartDiskConfig = {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'The number of Kilobyte per transfers',
+                        backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+                        borderColor: window.chartColors.red,
+                        fill: false,
+                        data: [],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    animation: {
+                        duration: 0
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            };
+
+            var cpuChart = new Chart(cpuCtx, chartCpuConfig);
+            var diskChart = new Chart(diskCtx, chartDiskConfig);
 
             socket.onmessage = function(event){
                 var data = JSON.parse(event.data);
                 console.log(data);
 
-                myChart.config.data.labels.push(data.date);
-                myChart.config.data.datasets[0].data.push(data.cpu.user);
-                myChart.config.data.datasets[1].data.push(data.cpu.system);
+                cpuChart.config.data.labels.push(data.date);
+                cpuChart.config.data.datasets[0].data.push(data.cpu.user);
+                cpuChart.config.data.datasets[1].data.push(data.cpu.system);
                 
-                myChart.update();
+                cpuChart.update();
 
-                if (myChart.config.data.labels.length > 5) {
-                    myChart.config.data.labels.shift();
-                    myChart.config.data.datasets[0].data.shift();
-                    myChart.config.data.datasets[1].data.shift();
+                diskChart.config.data.labels.push(data.date);
+                diskChart.config.data.datasets[0].data.push(data.disk.kbPerT);
 
-                    myChart.update();
+                diskChart.update();
+
+                if (cpuChart.config.data.labels.length > 5) {
+                    cpuChart.config.data.labels.shift();
+                    cpuChart.config.data.datasets[0].data.shift();
+                    cpuChart.config.data.datasets[1].data.shift();
+
+                    cpuChart.update();
+
+                    diskChart.config.data.labels.shift();
+                    diskChart.config.data.datasets[0].data.shift();
+
+                    diskChart.update();
                 }
                 
             }
         });
-    div.panel.panel-primary
-        div.panel.panel-heading
-            h4
-                span.label.label-danger CPU Stat
-        div.panel.panel-body
-            canvas(id="chart" width="1000" height="400")
+    div.row
+        div.panel.panel-primary
+            div.panel.panel-heading
+                h4
+                    span.label.label-danger CPU Stat
+            div.panel.panel-body
+                canvas(id="chartCpu" width="1000" height="400")
+    div.row
+        div.panel.panel-primary
+            div.panel.panel-heading
+                h4
+                    span.label.label-danger Disk Stat
+            div.panel.panel-body
+                canvas(id="chartDisk" width="1000" height="400")
