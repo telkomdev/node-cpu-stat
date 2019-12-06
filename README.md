@@ -1,5 +1,9 @@
 ## Realtime CPU Statistics built with Nodejs, Websocket, and ChartJs
 
+### How it works
+
+When you running this project on your local computer, this app will scrap and parse `stdout` from `iostat` command then feed it to your `websocket` server
+
 Getting started:
 
 install dependencies
