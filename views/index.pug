@@ -4,8 +4,9 @@ block content
     script(src='js/cpu.js')
     div.panel.panel-primary
         div.panel.panel-heading
-            button.btn.btn-primary(type="button" id="buttonStart") Start
-            button.btn.btn-danger(type="button" id="buttonStop") Stop
+            div.btn-group
+                button.btn.btn-primary(type="button" id="buttonStart") Start
+                button.btn.btn-danger(type="button" id="buttonStop") Stop
             div.hide(id="warningMessage")
         div.panel.panel-body    
             div.row
