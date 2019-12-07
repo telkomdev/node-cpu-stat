@@ -91,7 +91,6 @@ block content
                     return data.json();
                 })
                 .then(function(res) {
-                    console.log(res)
                     if (res.success) {
                         socket = new WebSocket(wsHost);
 
@@ -136,10 +135,12 @@ block content
                             }
                             
                         }
+                    } else {
+                        showWarning(res.message);
                     }
                 })
                 .catch(function(error) {
-
+                    showWarning(error);
                 });
             });
 
@@ -149,7 +150,11 @@ block content
                     return data.json();
                 })
                 .then(function(res) {
-                    console.log(res);
+                    if (res.success) {
+                        socket.close();
+                    } else {
+                        showWarning(res.message);
+                    }
                 })
                 .catch(function(error) {
 
@@ -157,19 +162,23 @@ block content
             });
 
         });
-    button.btn.btn-primary(type="button" id="buttonStart") Start
-    button.btn.btn-danger(type="button" id="buttonStop") Stop
-    div.row
-        div.panel.panel-primary
-            div.panel.panel-heading
-                h4
-                    span.label.label-danger CPU Stat
-            div.panel.panel-body
-                canvas(id="chartCpu" width="1000" height="400")
-    div.row
-        div.panel.panel-primary
-            div.panel.panel-heading
-                h4
-                    span.label.label-danger Disk Stat
-            div.panel.panel-body
-                canvas(id="chartDisk" width="1000" height="400")
+    div.panel.panel-primary
+        div.panel.panel-heading
+            button.btn.btn-primary(type="button" id="buttonStart") Start
+            button.btn.btn-danger(type="button" id="buttonStop") Stop
+            div.hide(id="warningMessage")
+        div.panel.panel-body    
+            div.row
+                div.panel.panel-primary
+                    div.panel.panel-heading
+                        h4
+                            span.label.label-danger CPU Stat
+                    div.panel.panel-body
+                        canvas(id="chartCpu" width="1000" height="400")
+            div.row
+                div.panel.panel-primary
+                    div.panel.panel-heading
+                        h4
+                            span.label.label-danger Disk Stat
+                    div.panel.panel-body
+                        canvas(id="chartDisk" width="1000" height="400")
