@@ -7,11 +7,10 @@ const express = require('express');
 // load env
 require('dotenv').config();
 
-const HttpHandler = require('./lib/http_handler');
-const httpHandler = new HttpHandler();
-
 const ChildIOStat = require('./lib/iostat');
 const childIOStat = new ChildIOStat(interval = '2');
+
+const httpHandler = require('./lib/http_handler');
 
 const app = express();
 
@@ -35,25 +34,7 @@ const listener = new Websocket.Server({
 require('./lib/socket')(listener, childIOStat);
 
 // routes
-app.get('/', httpHandler.index);
-
-app.get('/connect', (req, res, next) => {
-    if (childIOStat.isConnected()) {
-        return res.json({'success': false, 'message': 'process already connected'});
-    }
-
-    childIOStat.connect();
-    res.json({'success': true, 'message': 'success'});
-});
-
-app.get('/disconnect', (req, res, next) => {
-    if (!childIOStat.isConnected()) {
-        return res.json({'success': false, 'message': 'process already diconnected'});
-    }
-
-    childIOStat.disconnect();
-    res.json({'message': 'success'});
-});
+app.use('/', httpHandler(childIOStat));
 
 // set PORT
 const PORT = process.env.PORT;
