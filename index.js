@@ -38,11 +38,19 @@ require('./lib/socket')(listener, childIOStat);
 app.get('/', httpHandler.index);
 
 app.get('/connect', (req, res, next) => {
+    if (childIOStat.isConnected()) {
+        return res.json({'success': false, 'message': 'process already connected'});
+    }
+
     childIOStat.connect();
-    res.json({'message': 'success'});
+    res.json({'success': true, 'message': 'success'});
 });
 
 app.get('/disconnect', (req, res, next) => {
+    if (!childIOStat.isConnected()) {
+        return res.json({'success': false, 'message': 'process already diconnected'});
+    }
+
     childIOStat.disconnect();
     res.json({'message': 'success'});
 });
