@@ -2,7 +2,9 @@ extends layout
 
 block content
     script.
+
         $(document).ready(function(){
+            
             var cpuCtx = document.getElementById('chartCpu');
             var diskCtx = document.getElementById('chartDisk');
 
@@ -80,36 +82,82 @@ block content
             var cpuChart = new Chart(cpuCtx, chartCpuConfig);
             var diskChart = new Chart(diskCtx, chartDiskConfig);
 
-            socket.onmessage = function(event){
-                var data = JSON.parse(event.data);
-                console.log(data);
+            var socket;
+            var wsHost = 'ws://localhost:8000';
 
-                cpuChart.config.data.labels.push(data.date);
-                cpuChart.config.data.datasets[0].data.push(data.cpu.user);
-                cpuChart.config.data.datasets[1].data.push(data.cpu.system);
-                
-                cpuChart.update();
+            document.getElementById('buttonStart').addEventListener('click', function() {
+                fetch('http://localhost:8000/connect', {method: 'GET'})
+                .then(function(data) {
+                    return data.json();
+                })
+                .then(function(res) {
+                    if (res.message === 'success') {
+                        socket = new WebSocket(wsHost);
 
-                diskChart.config.data.labels.push(data.date);
-                diskChart.config.data.datasets[0].data.push(data.disk.kbPerT);
+                        socket.onopen = function() {
+                            console.log('connection opened...');
+                        }
 
-                diskChart.update();
+                        socket.onerror = function(e) {
+                            console.log(e);
+                        }
 
-                if (cpuChart.config.data.labels.length > 5) {
-                    cpuChart.config.data.labels.shift();
-                    cpuChart.config.data.datasets[0].data.shift();
-                    cpuChart.config.data.datasets[1].data.shift();
+                        socket.onclose = function(e) {
+                            console.log(e);
+                        }
 
-                    cpuChart.update();
+                        socket.onmessage = function(event) {
+                            var data = JSON.parse(event.data);
+                            console.log(data);
 
-                    diskChart.config.data.labels.shift();
-                    diskChart.config.data.datasets[0].data.shift();
+                            cpuChart.config.data.labels.push(data.date);
+                            cpuChart.config.data.datasets[0].data.push(data.cpu.user);
+                            cpuChart.config.data.datasets[1].data.push(data.cpu.system);
+                            
+                            cpuChart.update();
 
-                    diskChart.update();
-                }
-                
-            }
+                            diskChart.config.data.labels.push(data.date);
+                            diskChart.config.data.datasets[0].data.push(data.disk.kbPerT);
+
+                            diskChart.update();
+
+                            if (cpuChart.config.data.labels.length > 5) {
+                                cpuChart.config.data.labels.shift();
+                                cpuChart.config.data.datasets[0].data.shift();
+                                cpuChart.config.data.datasets[1].data.shift();
+
+                                cpuChart.update();
+
+                                diskChart.config.data.labels.shift();
+                                diskChart.config.data.datasets[0].data.shift();
+
+                                diskChart.update();
+                            }
+                            
+                        }
+                    }
+                })
+                .catch(function(error) {
+
+                });
+            });
+
+            document.getElementById('buttonStop').addEventListener('click', function() {
+                fetch('http://localhost:8000/disconnect', {method: 'GET'})
+                .then(function(data) {
+                    return data.json();
+                })
+                .then(function(res) {
+                    console.log(res);
+                })
+                .catch(function(error) {
+
+                });
+            });
+
         });
+    button.btn.btn-primary(type="button" id="buttonStart") Start
+    button.btn.btn-danger(type="button" id="buttonStop") Stop
     div.row
         div.panel.panel-primary
             div.panel.panel-heading

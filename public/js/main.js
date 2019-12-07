@@ -1,19 +1,4 @@
 
-var host = 'ws://localhost:8000';
-var socket = new WebSocket(host);
-
-socket.onopen = function() {
-    console.log('connection opened...');
-}
-
-socket.onerror = function(e) {
-    console.log(e);
-}
-
-socket.onclose = function(e) {
-    console.log(e);
-}
-
 window.chartColors = {
 	red: 'rgb(255, 99, 132)',
 	orange: 'rgb(255, 159, 64)',
