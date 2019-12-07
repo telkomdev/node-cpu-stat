@@ -30,7 +30,7 @@ const listener = new Websocket.Server({
     server: server
 });
 
-// init chat
+// init socket
 require('./lib/socket')(listener, childIOStat);
 
 // routes
