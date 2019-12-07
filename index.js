@@ -10,6 +10,9 @@ require('dotenv').config();
 const HttpHandler = require('./lib/http_handler');
 const httpHandler = new HttpHandler();
 
+const ChildIOStat = require('./lib/iostat');
+const childIOStat = new ChildIOStat(interval = '2');
+
 const app = express();
 
 //view engine
@@ -29,10 +32,20 @@ const listener = new Websocket.Server({
 });
 
 // init chat
-require('./lib/socket')(listener);
+require('./lib/socket')(listener, childIOStat);
 
 // routes
 app.get('/', httpHandler.index);
+
+app.get('/connect', (req, res, next) => {
+    childIOStat.connect();
+    res.json({'message': 'success'});
+});
+
+app.get('/disconnect', (req, res, next) => {
+    childIOStat.disconnect();
+    res.json({'message': 'success'});
+});
 
 // set PORT
 const PORT = process.env.PORT;
