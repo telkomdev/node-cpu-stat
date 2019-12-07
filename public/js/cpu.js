@@ -5,7 +5,7 @@ $(document).ready(function(){
 
     var color = Chart.helpers.color;
     var chartCpuConfig = {
-        type: 'line',
+        type: 'bar',
         data: {
             labels: [],
             datasets: [{
@@ -116,7 +116,7 @@ $(document).ready(function(){
 
                     diskChart.update();
 
-                    if (cpuChart.config.data.labels.length > 5) {
+                    if (cpuChart.config.data.labels.length > 10) {
                         cpuChart.config.data.labels.shift();
                         cpuChart.config.data.datasets[0].data.shift();
                         cpuChart.config.data.datasets[1].data.shift();
